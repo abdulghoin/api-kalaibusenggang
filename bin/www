@@ -19,6 +19,7 @@ mongoose.connect(
 	{ useNewUrlParser: true }, 
 	() => console.log('Yey, Mongo connected')
 );
+mongoose.set('useCreateIndex', true);
 
 /**
  * Get port from environment and store in Express.
