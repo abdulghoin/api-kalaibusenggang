@@ -14,6 +14,7 @@ module.exports = model(
     title: {
       type: String,
       required: true,
+      unique: true,
     },
     body: {
       type: String,
