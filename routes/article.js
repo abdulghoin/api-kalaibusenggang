@@ -1,6 +1,11 @@
 const express = require('express');
 const router = express.Router();
 
-router.get('/', () => res.send(''));
+const article = require('../controllers/article');
+
+router
+  .route('/')
+  .get(article.getAll)
+  .post(article.create);
 
 module.exports = router;
