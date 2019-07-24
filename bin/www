@@ -7,6 +7,8 @@
 var app = require('../app');
 var debug = require('debug')('v1.0.8-kalaibusenggang:server');
 var http = require('http');
+const dotenv = require('dotenv');
+dotenv.config();
 
 /**
  * Get port from environment and store in Express.
@@ -86,5 +88,6 @@ function onListening() {
   var bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;
+	console.log(bind);
   debug('Listening on ' + bind);
 }
