@@ -14,7 +14,11 @@ const mongoose = require('mongoose');
 
 
 // Connect DB
-mongoose.connect(process.env.MONGO_CONNECT, () => console.log('Yey, Mongo connected'));
+mongoose.connect(
+	process.env.MONGO_CONNECT, 
+	{ useNewUrlParser: true }, 
+	() => console.log('Yey, Mongo connected')
+);
 
 /**
  * Get port from environment and store in Express.
