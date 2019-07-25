@@ -1,52 +1,78 @@
-const multer = require('multer');
-const aws = require('aws-sdk');
-const multerS3 = require('multer-s3');
-const path = require('path');
-require('dotenv').config();
-const {S3_ID, S3_SECRET, S3_BUCKET} = process.env;
-console.log(process.env.S3_BUCKET)
+const Image = require('../models/image');
 
-const s3 = new aws.S3({
-  accessKeyId: S3_ID,
-  secretAccessKey: S3_SECRET,
-  Bucket: S3_BUCKET,
-});
+const {upload: uploadImage, delete: deleteImage} = require('../utils/image');
 
-const storage = multerS3({
-  s3,
-  bucket: S3_BUCKET,
-  acl: 'public-read',
-  key: (req, file, cb) => {
-    cb(
-      null,
-      path.basename(file.originalname, path.extname(file.originalname)) +
-        '-' +
-        Date.now() +
-        path.extname(file.originalname),
-    );
-  },
-});
+exports.upload = uploadImage.single('image');
 
-const limits = {fileSize: 2 * 1000 * 1000};
-
-const fileFilter = (req, file, cb) => {
-  const allowedTypes = /jpeg|jpg|png|gif/i;
-  const extname = allowedTypes.test(path.extname(file.originalname));
-  const mimetype = filetypes.test(file.mimetype);
-
-  if (mimetype && extname) return cb(null, true);
-
-  cb('Error: Images Only!');
+exports.getAll = async (req, res) => {
+  try {
+    const response = await Image.find();
+    res.json(response);
+  } catch (err) {
+    res.status(500).json(err);
+  }
 };
 
-const upload = multer({storage, limits, fileFilter});
+exports.create = async (req, res) => {
+  const {
+    file: {location: url, key: s3Key},
+  } = req;
+  try {
+    const image = new Image({url, s3Key});
+    const response = await image.save();
+    res.json(response);
+  } catch (err) {
+    deleteImage(url);
+    res.status(500).json(err);
+  }
+};
 
-exports.upload = upload.single('image');
+exports.delete = async (req, res) => {
+  try {
+    let {
+      query: {keys},
+    } = req;
+    let query = {};
 
-exports.getAll = (req, res) => res.send('');
+    if (keys) {
+      keys = keys.split(',').map(i => i.trim());
+      const queryRegex = new RegExp(keys.join('|'));
+      query = {s3Key: queryRegex};
+    } else {
+      const images = await Image.find();
+      keys = images.map(({s3Key}) => s3Key);
+    }
 
-exports.create = (req, res) => res.send('');
+    const response = await Image.deleteMany(query);
+    deleteImage(keys);
+    res.json(response);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+};
 
-exports.deleteImage = name => {
-  s3.deleteObject({Bucket: S3_BUCKET, Key: name}, (err, data) => {});
+exports.getOne = async (req, res) => {
+  try {
+    const {
+      params: {id: _id},
+    } = req;
+    const response = await Image.findOne({_id});
+    res.json(response);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+};
+
+exports.deleteOne = async (req, res) => {
+  try {
+    const {
+      params: {id: _id},
+    } = req;
+    const {s3Key} = await Image.findOne({_id});
+    const response = await Image.deleteOne({_id});
+    deleteImage(s3Key);
+    res.json(response);
+  } catch (err) {
+    res.status(500).json(err);
+  }
 };

@@ -5,7 +5,7 @@ exports.getAll = async (req, res) => {
     const response = await Article.find();
     res.json(response);
   } catch (err) {
-    res.json(err).status(500);
+    res.status(500).json(err);
   }
 };
 
@@ -16,7 +16,7 @@ exports.create = async (req, res) => {
     const response = await article.save();
     res.json(response);
   } catch (err) {
-    res.json(err).status(500);
+    res.status(500).json(err);
   }
 };
 
@@ -25,7 +25,7 @@ exports.deleteAll = async (req, res) => {
     const response = await Article.deleteMany();
     res.json(response);
   } catch (err) {
-    res.json(err).status(500);
+    res.status(500).json(err);
   }
 };
 
@@ -37,7 +37,7 @@ exports.getOne = async (req, res) => {
     const response = await Article.findOne({_id});
     res.json(response);
   } catch (err) {
-    res.json(err).status(500);
+    res.status(500).json(err);
   }
 };
 
@@ -53,7 +53,7 @@ exports.update = async (req, res) => {
     response = {...response._doc, ...data};
     res.json(response);
   } catch (err) {
-    res.json(err).status(500);
+    res.status(500).json(err);
   }
 };
 
@@ -66,6 +66,6 @@ exports.deleteOne = async (req, res) => {
     const response = await Article.deleteOne({_id});
     res.json(response);
   } catch (err) {
-    res.json(err).status(500);
+    res.status(500).json(err);
   }
 };
